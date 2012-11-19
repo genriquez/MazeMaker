@@ -54,14 +54,15 @@
 		<canvas id="maze" width="800" height="800"></canvas>
 		
 		<script type="text/javascript">
-			var canvasSize = 800;
+			var defaultCanvasSize = 800;
 			
 			function drawMaze(size, complexity) {
-				var scale = Math.floor(canvasSize / size);
+				var scale = Math.max(Math.floor(defaultCanvasSize / size), 1);
 
+				var canvasSize = (size - 1) * scale
 				var mazeCanvas = document.getElementById("maze");
-				mazeCanvas.height = (size - 1) * scale;
-				mazeCanvas.width = (size - 1) * scale;
+				mazeCanvas.height = canvasSize;
+				mazeCanvas.width = canvasSize;
 				
 				var mazeCtx = mazeCanvas.getContext("2d");
 				
@@ -75,7 +76,7 @@
 				try {
 					maze.initialize(complexity);
 				} catch(ex) {
-				
+					console.log("Excetpion thrown while generation maze", ex);
 				}
 				
 				for(var x = 0; x < size; x++) {
@@ -88,15 +89,10 @@
 				}
 			}
 			
-						
-	
-			
 			var drawButton = document.getElementById("draw");
 			drawButton.addEventListener("click", function() {
 				var size = parseInt(document.getElementById("size").value);
 				var complexity = parseInt(document.getElementById("complexity").value);
-			
-				
 				
 				drawMaze(size * 2, complexity / 100);
 			})
