@@ -9,21 +9,30 @@
 		var direction = new Vector2(1, 0);
 		var mazeTurnPoints = [position];
 		var turnRatio = 0.1;
+		var backtracking = false;
 
-		function hasValidNextStep(currentPosition, currentDirection) {
-			currentPosition = currentPosition || position;
-			currentDirection = currentDirection || direction;
+		function hasValidNextStep(position, direction) {
+			var hasValidNextStep = mazeMatrix.isValidPos(position.add(direction.multiply(2)));
 			
-			var hasValidNextStep = mazeMatrix.isValidPos(currentPosition.add(currentDirection.multiply(2)));
-			
-			var passageCheckProjection = currentPosition.add(currentDirection.multiply(2));
+			var passageCheckProjection = position.add(direction.multiply(2));
 			hasValidNextStep = hasValidNextStep && mazeMatrix.getPos(passageCheckProjection) == MazeBlock.Empty;
 			
 			return hasValidNextStep;
 		}
 		
-		function decideDeadEnd() {
-			var posibleDirections = [];
+		function decideTurn() {
+			// Turn decision variables
+			var chanceTurn = Math.random() <= turnRatio;
+			var invalidNextStep = !hasValidNextStep(position, direction);
+			
+			return chanceTurn || invalidNextStep || backtracking;
+		}
+
+		function isDeadEnd() {
+			var existsValidNextStep = false;
+			existsValidNextStep = existsValidNextStep || hasValidNextStep(position, direction)
+			existsValidNextStep = existsValidNextStep || getNewDirection() != null;
+			/*var posibleDirections = [];
 			posibleDirections.push(direction);
 			posibleDirections.push(direction.transpose());
 			posibleDirections.push(direction.transpose().multiply(-1));
@@ -31,21 +40,13 @@
 			var existsValidNextStep = false;
 			posibleDirections.forEach(function (direction) {
 				existsValidNextStep = existsValidNextStep || hasValidNextStep(position, direction);	
-			})
+			})*/
 			
 			return !existsValidNextStep;
 		}
 		
-		function decideTurn() {
-			// Turn decision variables
-			var chanceTurn = Math.random() <= turnRatio;
-			var invalidNextStep = !hasValidNextStep();
-			
-			return chanceTurn || invalidNextStep;
-		}
-		
 		function getNewDirection() {
-			var newDirections = [direction.transpose(), direction.transpose().multiply(-1)];
+			var newDirections = [direction, direction.multiply(-1), direction.transpose(), direction.transpose().multiply(-1)];
 			var validDirections = [];
 			
 			newDirections.forEach(function (direction) {
@@ -58,18 +59,16 @@
 		}
 		
 		function doBuildStep() {
-			if (decideDeadEnd()) {
+			if (isDeadEnd()) {
 				position = mazeTurnPoints.pop();
+				backtracking = true;
 				return;
+			
 			}
 			
 			if (decideTurn()) {
-				var newDirection = getNewDirection();
-				
-				if (newDirection != null) {
-					mazeTurnPoints.push(position);
-					direction = newDirection;
-				}
+				direction = getNewDirection();
+				mazeTurnPoints.push(position);
 			}
 			
 			mazeMatrix.setPos(position.add(direction), MazeBlock.Passage);
