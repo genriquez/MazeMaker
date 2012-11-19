@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Maze Maker</title>
+		<script type="text/javascript" src="mathutils.js"></script>
+		<script type="text/javascript" src="maze.js"></script>
+	</head>
+	<body>
+		<canvas id="maze" width="1000" height="1000"></canvas>
+		
+		<script type="text/javascript">
+			function drawMaze(size, scale) {
+				var mazeCanvas = document.getElementById("maze");
+				var mazeCtx = mazeCanvas.getContext("2d");
+				
+				mazeCtx.fillStyle = "black";
+				mazeCtx.fillRect(0, 0, 9999, 9999);
+				
+				mazeCtx.fillStyle = "white";
+				
+				var maze = new Maze(size);
+				
+				try {
+					maze.initialize();
+				} catch(ex) {
+				
+				}
+				
+				for(var x = 0; x < size; x++) {
+					for(var y = 0; y < size; y++) {
+						var mazeValue = maze.matrix.getPos(new Vector2(x,y));
+						if (mazeValue == 1) {
+							mazeCtx.fillRect((x + 1) * scale, (y + 1) * scale, scale, scale);
+						}
+					}
+				}
+			}
+			
+			drawMaze(400, 2);
+		</script>
+	</body>
+</html>
