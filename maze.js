@@ -8,7 +8,7 @@
 		var position = new Vector2(0, 0);
 		var direction = new Vector2(1, 0);
 		var mazeTurnPoints = [position];
-		var turnRatio = 0.1;
+		var complexity = 0.4;
 		var backtracking = false;
 
 		function hasValidNextStep(position, direction) {
@@ -20,9 +20,8 @@
 			return hasValidNextStep;
 		}
 		
-		function decideTurn() {
-			// Turn decision variables
-			var chanceTurn = Math.random() <= turnRatio;
+		function decideChangeDirection() {
+			var chanceTurn = Math.random() <= complexity;
 			var invalidNextStep = !hasValidNextStep(position, direction);
 			
 			return chanceTurn || invalidNextStep || backtracking;
@@ -32,15 +31,6 @@
 			var existsValidNextStep = false;
 			existsValidNextStep = existsValidNextStep || hasValidNextStep(position, direction)
 			existsValidNextStep = existsValidNextStep || getNewDirection() != null;
-			/*var posibleDirections = [];
-			posibleDirections.push(direction);
-			posibleDirections.push(direction.transpose());
-			posibleDirections.push(direction.transpose().multiply(-1));
-								  
-			var existsValidNextStep = false;
-			posibleDirections.forEach(function (direction) {
-				existsValidNextStep = existsValidNextStep || hasValidNextStep(position, direction);	
-			})*/
 			
 			return !existsValidNextStep;
 		}
@@ -63,20 +53,21 @@
 				position = mazeTurnPoints.pop();
 				backtracking = true;
 				return;
-			
 			}
 			
-			if (decideTurn()) {
+			if (decideChangeDirection()) {
 				direction = getNewDirection();
 				mazeTurnPoints.push(position);
 			}
 			
+			backtracking = false;
 			mazeMatrix.setPos(position.add(direction), MazeBlock.Passage);
 			position = position.add(direction.multiply(2));
 			mazeMatrix.setPos(position, MazeBlock.Passage);
 		}
 		
-		this.build = function () {	
+		this.build = function (selectedComplexity) {
+			complexity = selectedComplexity || complexity;
 			mazeMatrix.setPos(position, MazeBlock.Passage);
 			
 			while (mazeTurnPoints.length > 0) {
@@ -88,9 +79,9 @@
 	var Maze = context.Maze = function(size) {
 		var matrix = this.matrix = new Matrix2(size, size);
 		
-		this.initialize = function() {
+		this.initialize = function(complexity) {
 			var builder = new MazeBuilder(matrix, size);
-			builder.build();
+			builder.build(complexity);
 		}
 	};
 	

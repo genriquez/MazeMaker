@@ -4,24 +4,76 @@
 		<title>Maze Maker</title>
 		<script type="text/javascript" src="mathutils.js"></script>
 		<script type="text/javascript" src="maze.js"></script>
+		
+		<style>
+			body {
+				font-family: "Segoe UI", Helvetica;
+				padding: 0;
+				margin: 0;
+			}
+			
+			label {
+				vertical-align: middle;
+				display: inline-block;
+				width: 100px;
+			}
+			
+			div.controls {
+				background: #DDD;
+				border-right: 1px solid #AAA;
+				
+				position: absolute;
+				width: 300px;
+				bottom: 0;
+				top: 0;
+			}
+			
+			div.controls > div {
+				margin: 20px 0;				
+			}
+			
+			canvas {
+				float: right;
+				border: 10px solid black;
+				margin: 10px;
+			}
+			
+			#draw {
+				float: right;
+			}
+		</style>
 	</head>
 	<body>
-		<canvas id="maze" width="1000" height="1000"></canvas>
+		<div class="controls">
+			<h1>Maze Maker</h1>
+			<div class="input-field"><label for="size">Size: </label><input name="size" id="size" type="number" value="10" min="10" /></div>
+			<div class="input-field"><label for="complexity">Complexity: </label><input name="complexity" id="complexity" type="range" min="1" max="100" /></div>
+			<div><button id="draw">Draw!</button></div>
+		</div>
+		
+		<canvas id="maze" width="800" height="800"></canvas>
 		
 		<script type="text/javascript">
-			function drawMaze(size, scale) {
+			var canvasSize = 800;
+			
+			function drawMaze(size, complexity) {
+				var scale = Math.floor(canvasSize / size);
+
 				var mazeCanvas = document.getElementById("maze");
+				mazeCanvas.height = (size - 1) * scale;
+				mazeCanvas.width = (size - 1) * scale;
+				
 				var mazeCtx = mazeCanvas.getContext("2d");
 				
 				mazeCtx.fillStyle = "black";
-				mazeCtx.fillRect(0, 0, 9999, 9999);
+				mazeCtx.fillRect(0, 0, canvasSize, canvasSize);
 				
 				mazeCtx.fillStyle = "white";
 				
 				var maze = new Maze(size);
 				
 				try {
-					maze.initialize();
+					maze.initialize(complexity);
 				} catch(ex) {
 				
 				}
@@ -30,13 +82,24 @@
 					for(var y = 0; y < size; y++) {
 						var mazeValue = maze.matrix.getPos(new Vector2(x,y));
 						if (mazeValue == 1) {
-							mazeCtx.fillRect((x + 1) * scale, (y + 1) * scale, scale, scale);
+							mazeCtx.fillRect(x * scale, y * scale, scale, scale);
 						}
 					}
 				}
 			}
 			
-			drawMaze(50, 16);
+						
+	
+			
+			var drawButton = document.getElementById("draw");
+			drawButton.addEventListener("click", function() {
+				var size = parseInt(document.getElementById("size").value);
+				var complexity = parseInt(document.getElementById("complexity").value);
+			
+				
+				
+				drawMaze(size * 2, complexity / 100);
+			})
 		</script>
 	</body>
 </html>
